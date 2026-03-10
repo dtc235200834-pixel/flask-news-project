@@ -21,3 +21,5 @@ http://127.0.0.1:5000
 
 ## Tài khoản
 admin / 123
+
+## Update 1
