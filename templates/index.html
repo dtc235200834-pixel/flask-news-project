@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Quản lý tin tức</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+background:#eef2f7;
+font-family:'Segoe UI',sans-serif;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+background:#111827;
+color:white;
+min-height:100vh;
+padding:20px;
+}
+
+.sidebar a{
+color:white;
+display:block;
+padding:10px;
+text-decoration:none;
+border-radius:6px;
+margin-bottom:5px;
+transition:0.2s;
+}
+
+.sidebar a:hover{
+background:#1f2937;
+}
+
+/* MAIN CARD */
+
+.main-card{
+background:white;
+padding:30px;
+border-radius:16px;
+box-shadow:0 15px 35px rgba(0,0,0,0.1);
+}
+
+/* STATUS */
+
+.status{
+font-size:12px;
+padding:5px 12px;
+border-radius:20px;
+font-weight:600;
+}
+
+/* IMAGE */
+
+.post-img{
+border-radius:8px;
+object-fit:cover;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* TABLE */
+
+table tbody tr:hover{
+background:#f5f7fb;
+transition:0.2s;
+}
+
+td{
+vertical-align:middle;
+}
+
+/* TEXT LIMIT */
+
+.content-limit{
+max-width:250px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+/* BUTTON HOVER */
+
+.btn-sm{
+transition:0.2s;
+}
+
+.btn-sm:hover{
+transform:scale(1.1);
+}
+
+/* SEARCH BOX */
+
+.search-box{
+max-width:400px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container-fluid">
+<div class="row">
+
+<!-- SIDEBAR -->
+
+<div class="col-2 sidebar">
+
+<h4 class="text-center mb-4">ADMIN</h4>
+
+<a href="/">
+<i class="fa-solid fa-house"></i> Trang chủ
+</a>
+
+<a href="/stats">
+<i class="fa-solid fa-chart-pie"></i> Thống kê
+</a>
+
+<a href="#">
+<i class="fa-solid fa-newspaper"></i> Bài viết
+</a>
+
+<a href="/logout" class="btn btn-danger mt-3 w-100">
+Logout
+</a>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="col-10 p-4">
+
+<div class="main-card">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+
+<div class="alert alert-{{category}} alert-dismissible fade show">
+{{message}}
+<button class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<h1 class="text-center text-primary fw-bold mb-4">
+<i class="fa-solid fa-newspaper"></i>
+QUẢN LÝ TIN TỨC
+</h1>
+
+<!-- STATS -->
+
+<div class="row text-center mb-4">
+
+<div class="col">
+<div class="card shadow-sm border-0">
+<div class="card-body">
+<h6 class="text-muted">Tổng bài</h6>
+<h3 class="text-primary">{{ total }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col">
+<div class="card shadow-sm border-0">
+<div class="card-body">
+<h6 class="text-muted">Pending</h6>
+<h3 class="text-warning">{{ pending_count }}</h3>
+</div>
+</div>
+</div>
+
+<div class="col">
+<div class="card shadow-sm border-0">
+<div class="card-body">
+<h6 class="text-muted">Approved</h6>
+<h3 class="text-success">{{ approved_count }}</h3>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- SEARCH -->
+
+<form action="/" method="GET" class="d-flex mb-4 search-box">
+
+<input 
+type="text"
+name="search"
+class="form-control me-2"
+placeholder="Tìm tiêu đề bài viết..."
+value="{{ request.args.get('search','') }}"
+>
+
+<button type="submit" class="btn btn-primary">
+<i class="fa-solid fa-magnifying-glass"></i>
+</button>
+
+</form>
+
+<!-- ADD POST -->
+
+<form action="/add" method="POST" enctype="multipart/form-data" class="mb-4">
+
+<div class="mb-2">
+<input 
+name="title"
+class="form-control"
+placeholder="Tiêu đề tin"
+required
+>
+</div>
+
+<div class="mb-2">
+<textarea 
+name="content"
+class="form-control"
+placeholder="Nội dung bài viết"
+required
+></textarea>
+</div>
+
+<div class="mb-2">
+<input type="file" name="image" class="form-control">
+</div>
+
+<div class="mb-2">
+
+<label class="fw-semibold">Danh mục</label>
+
+<select name="category_id" class="form-control">
+
+{% for c in categories %}
+<option value="{{c.id}}">{{c.name}}</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<button class="btn btn-primary">
+<i class="fa-solid fa-plus"></i> Đăng tin
+</button>
+
+</form>
+
+<!-- FILTER -->
+
+<div class="mb-3">
+
+<a href="/" class="btn btn-outline-primary btn-sm">
+Tất cả {{ total }}
+</a>
+
+<a href="/?status=pending" class="btn btn-outline-warning btn-sm">
+Pending {{ pending_count }}
+</a>
+
+<a href="/?status=approved" class="btn btn-outline-success btn-sm">
+Approved {{ approved_count }}
+</a>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle">
+
+<thead class="table-dark">
+
+<tr>
+<th>ID</th>
+<th>Tiêu đề</th>
+<th>Danh mục</th>
+<th>Nội dung</th>
+<th>Ảnh</th>
+<th>Trạng thái</th>
+<th>Hành động</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for post in posts %}
+
+<tr>
+
+<td>{{ post.id }}</td>
+
+<td class="fw-semibold">{{ post.title }}</td>
+
+<td>{{ post.category.name }}</td>
+
+<td class="content-limit">{{ post.content }}</td>
+
+<td>
+
+{% if post.image %}
+
+<img
+src="{{ url_for('static', filename='uploads/' + post.image) }}"
+width="80"
+class="post-img"
+>
+
+{% else %}
+
+<span class="text-muted">Không có</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+<span class="badge rounded-pill px-3 py-2 {% if post.status == 'approved' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+{{ post.status }}
+</span>
+
+</td>
+
+<td>
+
+<a href="/edit/{{ post.id }}" class="btn btn-sm btn-primary" title="Sửa bài">
+<i class="fa-solid fa-pen"></i>
+</a>
+
+<a href="/delete/{{ post.id }}" class="btn btn-sm btn-danger"
+onclick="return confirm('Bạn có chắc muốn xoá bài viết này?')">
+<i class="fa-solid fa-trash"></i>
+</a>
+
+{% if post.status == 'pending' %}
+
+<a href="/approve/{{ post.id }}" class="btn btn-sm btn-success" title="Duyệt bài">
+<i class="fa-solid fa-check"></i>
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
