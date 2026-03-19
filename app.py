@@ -269,6 +269,31 @@ def delete(id):
 @app.route("/edit/<int:id>", methods=["GET", "POST"])
 def edit(id):
 
+    from collections import Counter
+
+@app.route("/stats")
+def stats():
+    posts = Post.query.all()
+
+    total = len(posts)
+    approved = len([p for p in posts if p.status == 'approved'])
+    pending = len([p for p in posts if p.status == 'pending'])
+
+    category_names = [p.category.name for p in posts if p.category]
+    category_count = Counter(category_names)
+
+    labels = list(category_count.keys())
+    data = list(category_count.values())
+
+    return render_template(
+        "stats.html",
+        total=total,
+        approved=approved,
+        pending=pending,
+        labels=labels,
+        data=data
+    )
+    
     post = Post.query.get_or_404(id)
 
     if request.method == "POST":
