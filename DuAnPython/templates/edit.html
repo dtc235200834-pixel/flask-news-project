@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+<title>Sửa bài</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light p-5">
+
+<div class="container">
+
+<h2>Sửa bài viết</h2>
+
+<form method="POST">
+
+<input name="title" value="{{post.title}}" class="form-control mb-2">
+
+<textarea name="content" class="form-control mb-2">
+{{post.content}}
+</textarea>
+
+<select name="category_id" class="form-control mb-2">
+
+{% for c in categories %}
+
+<option value="{{c.id}}" {% if c.id == post.category_id %}selected{% endif %}>
+{{c.name}}
+</option>
+
+{% endfor %}
+
+</select>
+
+<button class="btn btn-success">
+Cập nhật
+</button>
+
+<a href="/" class="btn btn-secondary">
+Quay lại
+</a>
+
+</form>
+
+</div>
+
+</body>
+</html>
